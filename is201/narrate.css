@@ -1,0 +1,109 @@
+/* narrate.css — the narration control, the read-along highlight and the recording booth
+   (narrate.js). Colors follow the IS 201 theme tokens, with fallbacks. */
+
+/* ── The block being read ──
+   A faint wash of the block's own text color, so it suits any background: a light wash on the
+   dark hero, a soft shade on the page and on white cards. The shadow is the padding around it. */
+.narr-now {
+  --narr-wash: color-mix(in srgb, currentColor 9%, transparent);
+  border-radius: 6px; transition: background .25s, box-shadow .25s;
+}
+.narr-now:not(.quiz, .callout, blockquote, .flow, tr) { background: var(--narr-wash); box-shadow: 0 0 0 10px var(--narr-wash); }
+tr.narr-now > * { background: var(--narr-wash); }
+:is(.quiz, .callout, blockquote, .flow).narr-now { box-shadow: 0 0 0 3px var(--gold, #A9822F); }
+html.narr-listening main :is(p, li, h1, h2, h3, h4, blockquote, tr, .flow, .callout, .quiz) { cursor: pointer; }
+html.narr-listening main :is(a, button, input, label) { cursor: revert; }
+
+/* ── The control (bottom right, above the progress dock) ── */
+.narr {
+  --dk: var(--sidebar, #16243E); --g: var(--accent, #2F5D9C); --gold-l: #E8C36A;
+  position: fixed; right: 14px; bottom: calc(var(--narr-dock, 0px) + 12px); z-index: 30;
+  max-width: calc(100vw - 28px);
+  font: 500 14.5px/1.3 "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, sans-serif; color: #fff;
+}
+.narr-bar {
+  display: flex; align-items: center; gap: 4px; padding: 4px;
+  background: color-mix(in srgb, var(--dk) 94%, transparent); border-radius: 999px;
+  box-shadow: 0 4px 16px rgb(0 0 0 / .25); width: max-content; max-width: 100%; margin-left: auto;
+  opacity: .9; transition: opacity .2s;
+}
+.narr:hover .narr-bar, .narr.is-on .narr-bar, .narr-bar:focus-within { opacity: 1; }
+.narr button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 40px; height: 40px; padding: 0 10px;
+  border: 0; border-radius: 999px; background: transparent; color: inherit; font: inherit; cursor: pointer;
+}
+.narr button:hover { background: rgb(255 255 255 / .12); }
+.narr button:focus-visible { outline: 2px solid var(--gold-l); outline-offset: 1px; }
+.narr button[hidden] { display: none; }
+.narr svg { width: 20px; height: 20px; fill: currentColor; flex: none; }
+.narr .narr-main { background: var(--g); padding: 0 16px 0 12px; font-weight: 600; }
+.narr .narr-main:hover { background: color-mix(in srgb, var(--g) 80%, #fff); }
+.narr .narr-follow { border: 1px solid rgb(255 255 255 / .35); height: 34px; font-size: 13px; }
+.narr-more { display: none; align-items: center; gap: 2px; }
+.narr.is-on .narr-more { display: inline-flex; }
+.narr-rate { font-variant-numeric: tabular-nums; min-width: 52px; }
+.narr [aria-pressed="false"] { opacity: .55; text-decoration: line-through; }
+.narr [aria-pressed="true"] { color: var(--gold-l); }
+.narr-status { padding: 0 6px; font-size: 12.5px; opacity: .8; white-space: nowrap; }
+.narr-status:empty { display: none; }
+@media (max-width: 640px) {
+  .narr { right: 8px; }
+  .narr button { min-width: 34px; height: 38px; padding: 0 7px; }
+  .narr .narr-main span { display: none; }           /* icon only on phones; aria-label still names it */
+  .narr .narr-main { padding: 0 10px; }
+  .narr-status, .narr .narr-auto { display: none; }
+}
+@media print {
+  .narr, .narr-booth { display: none !important; }
+  .narr-now { background: none; box-shadow: none; }
+}
+
+/* ── Recording booth (?record): clip list on the right, prompt along the bottom ── */
+html.narr-recording main, html.narr-recording footer { margin-right: 340px; }
+html.narr-recording body { padding-bottom: 240px; }
+html.narr-recording .progress-dock { display: none; }
+html.narr-recording main :is(p, li, h1, h2, h3, h4, blockquote, tr, .flow, .callout, .quiz) { cursor: pointer; }
+.narr-booth { font: 15px/1.4 "IBM Plex Sans", Roboto, Arial, sans-serif; color: var(--ink, #1B2333); }
+.nb-list {
+  position: fixed; top: 0; right: 0; bottom: 0; width: 340px; overflow: auto; z-index: 40;
+  background: #F4F7FC; border-left: 1px solid var(--border, #DAE1EC);
+}
+.nb-list ol { list-style: none; margin: 0; padding: 6px; }
+.nb-list button {
+  display: flex; align-items: center; gap: 8px; width: 100%; padding: 5px 8px; border: 0; border-radius: 6px;
+  background: none; font: 13px/1.3 Consolas, "Courier New", monospace; color: inherit; text-align: left; cursor: pointer;
+}
+.nb-list button:hover { background: var(--border, #DAE1EC); }
+.nb-list li.is-sel button { background: var(--accent, #2F5D9C); color: #fff; }
+.nb-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; border: 2px solid #7E93B8; }
+li[data-s="done"] .nb-dot { background: #1E7B57; border-color: #1E7B57; }
+li[data-s="stale"] .nb-dot { background: #E0A100; border-color: #E0A100; }
+.nb-prompt {
+  position: fixed; left: 0; right: 340px; bottom: 0; height: 230px; z-index: 40; box-sizing: border-box;
+  display: flex; flex-direction: column; gap: 8px; padding: 12px 18px; background: #fff;
+  border-top: 3px solid var(--accent, #2F5D9C); box-shadow: 0 -4px 14px rgb(0 0 0 / .12);
+}
+.nb-head { display: flex; align-items: center; gap: 14px; font-size: 14px; }
+.nb-key { font: 700 14px Consolas, "Courier New", monospace; }
+.nb-state { padding: 2px 8px; border-radius: 999px; background: var(--border, #DAE1EC); }
+.nb-state[data-s="done"] { background: #1E7B57; color: #fff; }
+.nb-state[data-s="stale"] { background: #E0A100; }
+.nb-count { margin-left: auto; color: var(--ink-soft, #4A5568); }
+.nb-text { flex: 1; margin: 0; overflow: auto; font: 400 23px/1.45 "IBM Plex Sans", Roboto, Arial, sans-serif; }
+.nb-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.nb-head button, .nb-controls button {
+  display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; cursor: pointer;
+  border: 1px solid var(--accent, #2F5D9C); border-radius: 6px; background: #fff; color: var(--accent, #2F5D9C);
+  font: 600 14px "IBM Plex Sans", Roboto, Arial, sans-serif;
+}
+.narr-booth button:disabled { opacity: .4; cursor: default; }
+.narr-booth svg { width: 18px; height: 18px; fill: currentColor; }
+.narr-booth kbd { font: 12px Consolas, monospace; padding: 0 4px; border: 1px solid currentColor; border-radius: 3px; opacity: .7; }
+.nb-folder.is-set { border-style: dashed !important; }
+.nb-controls .nb-rec { background: var(--accent, #2F5D9C); color: #fff; }
+.nb-controls .nb-rec.is-live { background: #B03B33; border-color: #B03B33; animation: nb-live 1s ease-in-out infinite alternate; }
+@keyframes nb-live { to { box-shadow: 0 0 0 6px rgb(176 59 51 / .25); } }
+.nb-meter { width: 160px; height: 10px; border-radius: 5px; background: var(--border, #DAE1EC); overflow: hidden; }
+.nb-meter i { display: block; height: 100%; width: 0; background: #1E7B57; transition: width .05s; }
+.nb-meter i[data-clip="1"] { background: #B03B33; }
+.nb-msg { color: var(--ink-soft, #4A5568); font-size: 13px; }
